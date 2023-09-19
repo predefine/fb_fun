@@ -22,7 +22,7 @@ test.elf: test.o startup.o
 test.bin: test.elf
 	$(CROSS_PREFIX)objcopy -O binary $< $@
 boot.img: test.bin
-	mkbootimg --kernel test.bin --base 0x11800000 --kernel_offset 0x00008000 -o boot.img
+	mkbootimg --kernel test.bin --base 0x20000000 --kernel_offset 0x00008000 -o boot.img
 
 clean:
 	rm -f test.bin test.elf startup.o test.o boot.img
