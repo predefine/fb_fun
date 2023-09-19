@@ -174,12 +174,14 @@ font_params get_font_params() {
 
 static inline void msm_write(unsigned int val, unsigned int off)
 {
-	__raw_writel(val, debug_port_base + off);
+	//__raw_writel(val, debug_port_base + off);
+        *(int*)(debug_port_base + off) = val;
 }
 
 static inline unsigned int msm_read(unsigned int off)
 {
-	return __raw_readl(debug_port_base + off);
+	//return __raw_readl(debug_port_base + off);
+        return *(int*)(debug_port_base + off);
 }
 
 
@@ -198,6 +200,16 @@ static inline void debug_putc(unsigned int c)
 	msm_write(c, UART_TF);
 }
 
+static void debug_puts(char *s)
+{
+	unsigned c;
+	while ((c = *s++)) {
+		if (c == '\n')
+			debug_putc('\r');
+		debug_putc(c);
+	}
+}
+
 void printk(char *text) {
 	if(debug_linecount > 100 || debug_linecount < 0)
 		debug_linecount = 0;
@@ -211,5 +223,6 @@ void printk(char *text) {
 int c_entry() {
 	for(;;) {
 		printk("hi\n");
+                debug_puts("hi\n");
 	}
 }
