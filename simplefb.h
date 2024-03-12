@@ -8,6 +8,8 @@
 #ifndef SIMPLEFB_H_	/* Include guard */
 #define SIMPLEFB_H_
 
+#include <stddef.h>
+
 typedef struct _color {
 	int r;
 	int g;
@@ -21,8 +23,8 @@ typedef struct _font_params {
 
 font_params get_font_params(void);
 
-long unsigned int strlen(const char *p) {
-	unsigned int i = 0;
+size_t strlen(const char *p) {
+	size_t i = 0;
 
 	while(*p != '\0') {
 		i++;

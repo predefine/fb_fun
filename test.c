@@ -6,10 +6,17 @@
  * Copyright (c) 2023, Leandro Friedrich <email@leandrofriedrich.de>
  */
 
+#define FB_ADDR_PATH "/chosen"
+#define FB_ADDR_PROP "atag,videolfb"
+
 #include <stdint.h>
 #include "simplefb.h"
 #include "font.h"
 #include "debug.h"
+#include <libfdt.h>
+
+static char* fb_address;
+
 void clean_fb(volatile char *fb, char *text, int width, int height, int stride) {
         for (volatile char *addr = fb; addr < fb + (width * height * stride); addr += stride)
                 *(int*) (addr) = 0x0;
@@ -18,10 +25,10 @@ void clean_fb(volatile char *fb, char *text, int width, int height, int stride) 
 void draw_pixel(volatile char *fb, int x, int y, int width, int stride) {
         long int location = (x * stride) + (y * width * stride);
 
-        *(fb + location) = 255; // Blue
-        *(fb + location + 1) = 255;     // Green
-        *(fb + location + 2) = 255;     // Red
-        *(fb + location + 3) = 255;     // Full opacity
+        *(fb + location) = 0xff; // Blue
+        *(fb + location + 1) = 0xff;     // Green
+        *(fb + location + 2) = 0xff;     // Red
+        *(fb + location + 3) = 0xff;     // Full opacity
 }
 
 void draw_horizontal_line(volatile char *fb, int x1, int x2, int y, color c, int width, int stride) {
@@ -72,14 +79,34 @@ void printk(char *text) {
 	if(debug_linecount > 100 || debug_linecount < 0)
 		debug_linecount = 0;
 
-//	draw_text((char*)0x2a00000, "[uniLoader] ", 0, (20 + (debug_linecount * 30)), 480, 4);
-	draw_text((char*)0x2a00000, text, 0, (20 + (debug_linecount * 30)), 480, 4);
+	draw_text(fb_address, text, 0, (debug_linecount * FONTH), 800, 4);
 
 	debug_linecount++;
 }
-
-int c_entry() {
-	for(;;) {
-		printk("hi\n");
+void detect_fb_address(void* fdt){
+	int node = fdt_path_offset(fdt,FB_ADDR_PATH);
+	if(node < 0){
+		//printk("Failed find "FB_ADDR_PATH" in fdt!\n");
+		return;
 	}
+	int len;
+	const fdt64_t* value = fdt_getprop(fdt, node, FB_ADDR_PROP, &len);
+	if(!value){
+		//printk("Value of "FB_ADDR_PATH"/"FB_ADDR_PROP" is null!\n");
+		return;
+	}
+	printk("framebuffer address was found :D\n");
+	fb_address = ((char*)0 + *value);
+	return;
+}
+
+int c_entry(void* a, void* b, void* fdt) {
+	detect_fb_address(fdt);
+	printk("hi\n");
+	printk("hi\n");
+	printk("hi\n");
+	printk("hi\n");
+	printk("hi\n");
+	printk("fb_fun on MT8321(aka MT6580) works :D\n");
+        for(;;);
 }
