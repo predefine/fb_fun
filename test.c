@@ -95,7 +95,7 @@ void detect_fb_address(void* fdt){
 		//printk("Value of "FB_ADDR_PATH"/"FB_ADDR_PROP" is null!\n");
 		return;
 	}
-	printk("framebuffer address was found :D\n");
+	//printk("framebuffer address was found :D\n");
 	fb_address = ((char*)0 + *value);
 	return;
 }
